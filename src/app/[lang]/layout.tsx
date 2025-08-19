@@ -61,7 +61,7 @@ export default async function RootLayout({  children ,  params  } : {  children:
           />
        
        
-       <Script src='//libtl.com/sdk.js' data-zone='9717965' data-sdk='show_9717965' /> 
+       <Script src='//libtl.com/sdk.js' data-zone='9600002' data-sdk='show_9600002' /> 
          
         <ErrorBoundary FallbackComponent={ErrorFallback}>
      

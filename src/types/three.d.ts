@@ -53,7 +53,7 @@ declare module 'three/examples/jsm/loaders/GLTFLoader' {
 
 declare global {
   interface Window {
-    show_9717965?: () => Promise<void>;
+    show_9600002?: () => Promise<void>;
   }
 }
 

@@ -116,7 +116,7 @@ export default function Home() {
                 const showAd = async () => {
                     try {
                         setIsLoading(true);
-                        await window.show_9717965?.();
+                        await window.show_9600002?.();
                         dispatch(watchAdRequest());
                         dispatch(fetchUserStats());
                         setCountdown(5); // Reset countdown after successful ad view
@@ -145,11 +145,11 @@ export default function Home() {
         try {
             setIsLoading(true);
             // Check if the ad script is loaded
-            if (typeof window.show_9717965 === 'undefined') {
+            if (typeof window.show_9600002 === 'undefined') {
                 throw new Error('Ad system not initialized');
             }
 
-            await window.show_9717965();
+            await window.show_9600002();
             dispatch(watchAdRequest());
 
         } catch (err) {

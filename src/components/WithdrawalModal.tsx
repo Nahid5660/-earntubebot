@@ -79,7 +79,27 @@ const WithdrawalModal = ({ isOpen, onClose }: WithdrawalModalProps) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const withdrawalFee = Number(amount) * 0.1;
+  // Calculate fee and receive amount based on selected payment method
+  const calculateFee = (amount: number, method: PaymentMethod | undefined) => {
+    if (!method) return 0;
+    
+    // Parse fee string (e.g., "0.1%", "10 BDT", "5 USDT")
+    const feeStr = method.fee;
+    if (feeStr.includes('%')) {
+      const percentage = parseFloat(feeStr.replace('%', ''));
+      return (amount * percentage) / 100;
+    } else if (feeStr.includes('BDT') || feeStr.includes('USDT')) {
+      return parseFloat(feeStr.replace(/[^\d.]/g, ''));
+    } else {
+      // Assume it's a fixed amount
+      return parseFloat(feeStr) || 0;
+    }
+  };
+
+  const selectedPaymentMethod = paymentMethods.find(method => method.id === selectedMethod);
+  const isCryptoPayment = selectedPaymentMethod?.category === 'Crypto';
+
+  const withdrawalFee = calculateFee(Number(amount), selectedPaymentMethod);
   const receiveAmount = Number(amount) - withdrawalFee;
 
   const USD_TO_BDT_RATE = 100;
@@ -96,10 +116,6 @@ const WithdrawalModal = ({ isOpen, onClose }: WithdrawalModalProps) => {
       setAmount(usdtEquivalent.toString());
     }
   };
-
-
-  const selectedPaymentMethod = paymentMethods.find(method => method.id === selectedMethod);
-  const isCryptoPayment = selectedPaymentMethod?.category === 'Crypto';
 
   // Network options for crypto payments
   const networkOptions = [
@@ -578,7 +594,10 @@ const WithdrawalModal = ({ isOpen, onClose }: WithdrawalModalProps) => {
                             </label>
                             <div className="text-sm text-gray-400">
                               {t('withdrawal.available', 'Available')}: <span className="text-white">
-                                {isCryptoPayment ? userBalance.toFixed(2) : usdtEquivalent.toLocaleString()} {isCryptoPayment ? 'USDT' : 'BDT'}
+                                {selectedPaymentMethod ? 
+                                  (isCryptoPayment ? userBalance.toFixed(2) : usdtEquivalent.toLocaleString()) + ' ' + selectedPaymentMethod.currency
+                                  : (isCryptoPayment ? userBalance.toFixed(2) : usdtEquivalent.toLocaleString()) + ' ' + (isCryptoPayment ? 'USDT' : 'BDT')
+                                }
                               </span>
                             </div>
                           </div>
@@ -599,8 +618,8 @@ const WithdrawalModal = ({ isOpen, onClose }: WithdrawalModalProps) => {
                               }}
                               className="w-full px-4 py-3 bg-transparent text-white placeholder-gray-500 focus:outline-none disabled:cursor-not-allowed"
                               placeholder={selectedMethod ? (isCryptoPayment ? "Enter USDT amount" : "Enter amount") : "Select payment method first"}
-                              min={isCryptoPayment ? "1" : "50"}
-                              max={isCryptoPayment ? userBalance : userBalance}
+                              min={selectedPaymentMethod?.minAmount || (isCryptoPayment ? 1 : 50)}
+                              max={selectedPaymentMethod?.maxAmount || (isCryptoPayment ? userBalance : usdtEquivalent)}
                               disabled={!selectedMethod}
                             />
                             <div className="absolute inset-y-0 right-0 flex items-center gap-2 pr-4">
@@ -613,37 +632,50 @@ const WithdrawalModal = ({ isOpen, onClose }: WithdrawalModalProps) => {
                                   MAX
                                 </button>
                               )}
-                              <span className="text-sm text-gray-400">{isCryptoPayment ? 'USDT' : 'BDT'}</span>
+                              <span className="text-sm text-gray-400">
+                                {selectedPaymentMethod ? selectedPaymentMethod.currency : (isCryptoPayment ? 'USDT' : 'BDT')}
+                              </span>
                             </div>
                           </div>
                           {amount && (
                             <div className="mt-2 space-y-1">
-                              {isCryptoPayment ? (
+                              {selectedPaymentMethod && (
                                 <>
                                   <div className="flex justify-between text-sm">
                                     <span className="text-gray-400">{t('withdrawal.fee', 'Fee')}:</span>
-                                    <span className="text-red-500">-{(Number(amount) * 0.1).toFixed(2)} USDT (10%)</span>
+                                    <span className="text-red-500">-{withdrawalFee.toFixed(2)} {selectedPaymentMethod.currency} ({selectedPaymentMethod.fee})</span>
                                   </div>
                                   <div className="flex justify-between text-sm">
                                     <span className="text-gray-400">{t('withdrawal.receive', 'You will receive')}:</span>
-                                    <span className="text-green-500">{(Number(amount) - Number(amount) * 0.1).toFixed(2)} USDT</span>
+                                    <span className="text-green-500">{receiveAmount.toFixed(2)} {selectedPaymentMethod.currency}</span>
+                                  </div>
+                                  {!isCryptoPayment && (
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-400">{t('withdrawal.usdtEquivalent', 'Equivalent in USDT')}:</span>
+                                      <span className="text-blue-400">{(Number(amount) / USD_TO_BDT_RATE).toFixed(2)} USDT</span>
+                                    </div>
+                                  )}
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400">{t('withdrawal.processingTime', 'Processing Time')}:</span>
+                                    <span className="text-yellow-400">{selectedPaymentMethod.estimatedTime}</span>
                                   </div>
                                 </>
-                              ) : (
-                                <>
-                                  <div className="flex justify-between text-sm">
-                                    <span className="text-gray-400">{t('withdrawal.fee', 'Fee')}:</span>
-                                    <span className="text-red-500">-{withdrawalFee.toLocaleString()} BDT (10%)</span>
-                                  </div>
-                                  <div className="flex justify-between text-sm">
-                                    <span className="text-gray-400">{t('withdrawal.receive', 'You will receive')}:</span>
-                                    <span className="text-green-500">{receiveAmount.toLocaleString()} BDT</span>
-                                  </div>
-                                  <div className="flex justify-between text-sm">
-                                    <span className="text-gray-400">{t('withdrawal.usdtEquivalent', 'Equivalent in USDT')}:</span>
-                                    <span className="text-blue-400">{(Number(amount) / USD_TO_BDT_RATE).toFixed(2)} USDT</span>
-                                  </div>
-                                </>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Min/Max validation messages */}
+                          {selectedPaymentMethod && amount && (
+                            <div className="mt-2">
+                              {Number(amount) < selectedPaymentMethod.minAmount && (
+                                <p className="text-xs text-red-500">
+                                  Minimum amount is {selectedPaymentMethod.minAmount} {selectedPaymentMethod.currency}
+                                </p>
+                              )}
+                              {Number(amount) > selectedPaymentMethod.maxAmount && (
+                                <p className="text-xs text-red-500">
+                                  Maximum amount is {selectedPaymentMethod.maxAmount} {selectedPaymentMethod.currency}
+                                </p>
                               )}
                             </div>
                           )}
@@ -681,8 +713,8 @@ const WithdrawalModal = ({ isOpen, onClose }: WithdrawalModalProps) => {
                         !amount ||
                         (isCryptoPayment ? !usdtAddress : !phoneNumber) ||
                         (isCryptoPayment ? !usdtAddress.startsWith(selectedNetworkOption?.prefix || 'T') : !!getPhoneNumberError(phoneNumber)) ||
-                        (isCryptoPayment ? Number(amount) < 1 : Number(amount) < 100) ||
-                        (isCryptoPayment ? Number(amount) > userBalance : Number(amount) > usdtEquivalent)
+                        (selectedPaymentMethod ? Number(amount) < selectedPaymentMethod.minAmount : Number(amount) < (isCryptoPayment ? 1 : 100)) ||
+                        (selectedPaymentMethod ? Number(amount) > selectedPaymentMethod.maxAmount : Number(amount) > (isCryptoPayment ? userBalance : usdtEquivalent))
                       }
                     >
                       {isSubmitting ? t('withdrawal.processing', 'Processing...') : t('withdrawal.submit', 'Withdraw')}
