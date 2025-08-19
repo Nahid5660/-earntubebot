@@ -297,6 +297,29 @@ export default function AdminLayout({
 
   const { data: session, status } = useSession()
    
+  // Check if user is authenticated and is an admin
+  useEffect(() => {
+    if (status === 'loading') return;
+    
+    if (!session?.user || session.user.role !== 'admin') {
+      router.push('/');
+      return;
+    }
+  }, [session, status, router]);
+
+  // Show loading while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // Don't render admin layout if user is not admin
+  if (!session?.user || session.user.role !== 'admin') {
+    return null; // This will redirect to home page due to useEffect
+  }
   
   return (
     <div 

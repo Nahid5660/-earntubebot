@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import {
   DashboardOutlined,
   UserOutlined,
@@ -24,20 +25,51 @@ export default function AdminPage() {
   const router = useRouter();
   const pathname = usePathname();
   const dispatch = useDispatch();
+  const { data: session, status } = useSession();
   const stats = useSelector(selectAdminStats);
   const recentActivities = useSelector(selectRecentActivities);
   const loading = useSelector(selectAdminLoading);
 
+  // Check if user is authenticated and is an admin
   useEffect(() => {
-    dispatch(fetchAdminStats());
-    dispatch(fetchRecentActivities());
-  }, [dispatch]);
+    if (status === 'loading') return;
+
+    console.log(session)
+    
+    if (!session?.user || session.user.role !== 'admin') {
+
+      router.push('/');
+      return;
+    }
+  }, [session, status, router]);
+
+  useEffect(() => {
+    // Only fetch admin data if user is admin
+    if (session?.user?.role === 'admin') {
+      dispatch(fetchAdminStats());
+      dispatch(fetchRecentActivities());
+    }
+  }, [dispatch, session]);
 
 
   const handleRefresh = () => {
     //dispatch(fetchDashboardStatsRequest());
     //dispatch(fetchRecentActivitiesRequest());
   };
+
+  // Show loading while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // Don't render admin content if user is not admin
+  if (!session?.user || session.user.role !== 'admin') {
+    return null; // This will redirect to home page due to useEffect
+  }
 
   return (
     <>
