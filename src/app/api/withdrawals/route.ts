@@ -210,7 +210,7 @@ export async function POST(req: Request) {
         }
 
         // Validate withdrawal method exists, is active, and is Mobile Banking
-        const withdrawalMethod = await WithdrawalMethod.findOne({ id: 'wm_mobile banking_1755351274414' });
+        const withdrawalMethod = await WithdrawalMethod.findOne({ id: 'wm_mobile banking_1755632583285' });
         if (!withdrawalMethod) {
             return NextResponse.json(
                 { error: 'Invalid withdrawal method' },
