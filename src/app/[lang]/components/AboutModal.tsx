@@ -166,13 +166,13 @@ export default function AboutModal({
                                 <div>
                                     <p>  <p className="text-gray-300">Need help? Contact our support team through Telegram </p>
                                         Channel <a href="https://t.me/earntubebot_bot_support" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">
-                                        Instant Pey CH </a></p>
+                                        EarnTubeBot Suport Link  </a></p>
 
-                                    <p> Admin <a href="https://t.me/earntubebot_bot_support" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">
-                                      Instant Pey    </a></p>
+                                    <p> Admin <a href="https://t.me/nahid5660" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">
+                                    MD NAHID HASAN</a></p>
 
                                     <p>Developer <a href="https://t.me/nahid5660" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">
-                                    @nahid5660</a></p>
+                                    MD NAHID HASAN</a></p>
 
                                     <p className="font-bold mt-4 rgb-flicker" style={{ animation: "rgbFlicker 1s linear infinite" }}>Contact the Admin and developer to design the Bot/website according to your preferences  </p>
                                     <style jsx>{`
