@@ -84,8 +84,8 @@ const defaultAboutData: Omit<IAbout, 'lastUpdated'> = {
         ctaDescription: 'Join thousands of users who are already earning with ClickMasterAds!'
     },
     contact: {
-        telegram: 'https://t.me/clickmasterads',
-        email: 'support@clickmasterads.com'
+        telegram: 'https://t.me/earntubebot_bot_support',
+        email: 'mdnahid5660@gmail.com'
     }
 };
 
